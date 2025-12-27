@@ -1,6 +1,7 @@
 package com.anubhavtyagi28.SPRINGMVC.controllers;
 
 import com.anubhavtyagi28.SPRINGMVC.dto.EmployeeDTO;
+import com.anubhavtyagi28.SPRINGMVC.exceptions.ResourceNotFoundException;
 import com.anubhavtyagi28.SPRINGMVC.services.EmployeeService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -26,12 +28,15 @@ public class EmployeeController {
     @GetMapping(path = "/{employeeId}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable(name="employeeId") Long id){
         Optional<EmployeeDTO> employeeDTO = employeeService.getEmployeeById(id);
-        return employeeDTO.map(employeeDTO1 -> ResponseEntity.ok(employeeDTO1)).orElse(ResponseEntity.notFound().build());
+        return employeeDTO
+                .map(employeeDTO1 -> ResponseEntity.ok(employeeDTO1))
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: "+id));
     }
     @GetMapping
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees(@RequestParam(required = false) Integer age, @RequestParam(required = false) String sortBy) {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
+
     @PostMapping
     public ResponseEntity<EmployeeDTO> createNewEmployee(@RequestBody @Valid EmployeeDTO inputEmployee){
         EmployeeDTO savedEmployee = employeeService.createNewEmployee(inputEmployee);

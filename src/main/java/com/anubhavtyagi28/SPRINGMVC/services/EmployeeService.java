@@ -2,12 +2,12 @@ package com.anubhavtyagi28.SPRINGMVC.services;
 
 import com.anubhavtyagi28.SPRINGMVC.dto.EmployeeDTO;
 import com.anubhavtyagi28.SPRINGMVC.entities.EmployeeEntity;
+import com.anubhavtyagi28.SPRINGMVC.exceptions.ResourceNotFoundException;
 import com.anubhavtyagi28.SPRINGMVC.repositories.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -44,26 +44,20 @@ public class EmployeeService {
     }
 
     public EmployeeDTO updateEmployeeById(Long employeeId, EmployeeDTO employeeDTO) {
+        isExistsByEmployeeId(employeeId);
         EmployeeEntity employeeEntity = modelMapper.map(employeeDTO, EmployeeEntity.class);
         employeeEntity.setId(employeeId);
         EmployeeEntity savedEmployee = employeeRepository.save(employeeEntity);
         return modelMapper.map(savedEmployee, EmployeeDTO.class);
     }
-
-    public boolean isExistsByEmployeeId(Long employeeId){
-        return employeeRepository.existsById(employeeId);
-    }
-
     public boolean deleteEmployeeById(Long id) {
-        boolean exists = isExistsByEmployeeId(id);
-        if(!exists) return false;
+        isExistsByEmployeeId(id);
         employeeRepository.deleteById(id);
         return true;
     }
 
     public EmployeeDTO updatePartialEmployeeById(Long employeeId, Map<String, Object> updates) {
-        boolean exists = isExistsByEmployeeId(employeeId);
-        if(!exists) return null;
+        isExistsByEmployeeId(employeeId);
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
         updates.forEach((field, value) -> {
             Field declaredField = ReflectionUtils.findField(EmployeeEntity.class, field);
@@ -72,4 +66,9 @@ public class EmployeeService {
         });
         return modelMapper.map(employeeRepository.save(employeeEntity), EmployeeDTO.class);
     }
+    public void isExistsByEmployeeId(Long employeeId){
+        boolean exists = employeeRepository.existsById(employeeId);
+        if(!exists) throw new ResourceNotFoundException("Employee not found with id: "+employeeId);
+    }
+
 }
