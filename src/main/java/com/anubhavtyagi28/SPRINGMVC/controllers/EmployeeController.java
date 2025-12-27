@@ -2,6 +2,7 @@ package com.anubhavtyagi28.SPRINGMVC.controllers;
 
 import com.anubhavtyagi28.SPRINGMVC.dto.EmployeeDTO;
 import com.anubhavtyagi28.SPRINGMVC.services.EmployeeService;
+import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +33,12 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
     @PostMapping
-    public ResponseEntity<EmployeeDTO> createNewEmployee(@RequestBody EmployeeDTO inputEmployee){
+    public ResponseEntity<EmployeeDTO> createNewEmployee(@RequestBody @Valid EmployeeDTO inputEmployee){
         EmployeeDTO savedEmployee = employeeService.createNewEmployee(inputEmployee);
         return new ResponseEntity<>(savedEmployee, HttpStatus.CREATED);
     }
     @PutMapping(path="/{employeeId}")
-    public ResponseEntity<EmployeeDTO> updateEmployee(@RequestBody EmployeeDTO employeeDTO, @PathVariable Long employeeId) {
+    public ResponseEntity<EmployeeDTO> updateEmployee(@RequestBody @Valid EmployeeDTO employeeDTO, @PathVariable Long employeeId) {
         return ResponseEntity.ok(employeeService.updateEmployeeById(employeeId, employeeDTO));
     }
     @DeleteMapping(path = "/{employeeId}")
